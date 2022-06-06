@@ -48,7 +48,7 @@ class Routing
         if(file_exists($path)) {
             return true;
         } else {
-            die("File not exist");
+            return false;
         }
     }
     // Существование контроллера
@@ -57,7 +57,7 @@ class Routing
         if(class_exists($controllerName)) {
             return true;
         } else {
-            die("Controller not exist");
+            return false;
         }
     }
     // Существование действия
@@ -66,11 +66,11 @@ class Routing
         if(method_exists($controllerName, $actionName)) {
             return true;
         } else {
-            die("Action not exist");
+            return false;
         }
     }
     // Проверка home контроллера на существование действия
-    private function verifyMethodHomeController(string $method)
+    private function actionHomeControllerExist(string $method)
     {
         require_once($_SERVER['DOCUMENT_ROOT'] . '/controllers/HomeController.php');
         if(method_exists("HomeController", $method)) {
@@ -118,7 +118,7 @@ class Routing
         // Имя контроллера без Controller без заглавного символа
         $controllerName = $controller["controller"];
         
-        if($this->verifyMethodHomeController($controllerName)) {
+        if($this->actionHomeControllerExist($controllerName)) {
             require_once($_SERVER['DOCUMENT_ROOT'] . "/controllers/Controller.php");
             // Подключаю класс View
             require_once($_SERVER['DOCUMENT_ROOT'] . "/views/View.php");
