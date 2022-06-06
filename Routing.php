@@ -116,16 +116,16 @@ class Routing
     private function callDefaultController(array $controller) 
     {
         // Имя контроллера без Controller без заглавного символа
-        $controllerName = $controller["controller"];
+        $action = $controller["controller"];
         
-        if($this->actionHomeControllerExist($controllerName)) {
+        if($this->actionHomeControllerExist($action)) {
             require_once($_SERVER['DOCUMENT_ROOT'] . "/controllers/Controller.php");
             // Подключаю класс View
             require_once($_SERVER['DOCUMENT_ROOT'] . "/views/View.php");
             // Вызов контроллера
             $controllerExist = $controller["controller"] = "HomeController";
             // Вызов действия
-            $actionExist = $controller["action"] = $controllerName;
+            $actionExist = $controller["action"] = $action;
             // Вызов параметров
             $paramsExist = $controller["params"] = array_slice($this->divideURI(), 1);            
             // Создание контроллера, передаются параметры
