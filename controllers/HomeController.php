@@ -36,7 +36,6 @@ class HomeController extends Controller
         $art = new ArticlesModel();
         $article = $art->getOneArticle($this->params[0]);
 
-        // var_dump($article);
         $id = $article->getId();
         $title = $article->getTitle();
         $text = $article->getText();
@@ -51,7 +50,6 @@ class HomeController extends Controller
             "date" => $date
         ]);
     
-        
     }
 
 

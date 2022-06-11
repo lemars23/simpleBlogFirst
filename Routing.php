@@ -80,63 +80,56 @@ class Routing
         }
     }
     // Вызов контроллера
-    private function callController(array $controller)
+    private function callController(string $controller, string $action, ?array $params, string $controllerPath)
     {
-        // Имя контроллера без Controller без заглавного символа
-        $controllerName = $controller["controller"];
-        // Имя контроллера с Controller с заглавным символом
-        $controllerExist = ucfirst($controllerName) . "Controller";
-        // Путь контроллера
-        $controllerPath = $_SERVER['DOCUMENT_ROOT'] . '/controllers/' . $controllerExist . '.php';
-
-        
         // Проверка на существование файла
         if($this->fileExist($controllerPath)) {
             // Подключение файла
             require_once($controllerPath);
             // Проверка на существование класса контроллера
-            if($this->controllerExist($controllerExist)) {
-                // Действие контроллера
-                $actionExist = $controller["action"];
+            if($this->controllerExist($controller)) {
                 // Проверка на существование действия контроллера
-                if($this->actionExist($controllerExist, $actionExist)) {
+                if($this->actionExist($controller, $action)) {
                     // Подключаю класс View
                     require_once($_SERVER['DOCUMENT_ROOT'] . "/views/View.php");
-                    // Параметры действия контроллера
-                    $paramsExist = $controller["params"];
                     // Создание контроллера, передаются параметры
-                    $newController = new $controllerExist($paramsExist);
+                    $newController = new $controller($params);
                     // Вызов действия контроллера
-                    $newController->$actionExist();
+                    $newController->$action();
                 }
             }
         }
     }
-    // Вызов контроллера, с первым шагом проверкой home контроллера и последующими других 
+    // Вызов контроллера, первый вызов по url controller, если не находит то проверка и вызов homecontroller-а
     private function callDefaultController(array $controller) 
     {
-        // Имя контроллера без Controller без заглавного символа
         $action = $controller["controller"];
         
-        if($this->actionHomeControllerExist($action)) {
-            require_once($_SERVER['DOCUMENT_ROOT'] . "/controllers/Controller.php");
-            // Подключаю класс View
-            require_once($_SERVER['DOCUMENT_ROOT'] . "/views/View.php");
-            // Вызов контроллера
-            $controllerExist = $controller["controller"] = "HomeController";
-            // Вызов действия
-            $actionExist = $controller["action"] = $action;
-            // Вызов параметров
-            $paramsExist = $controller["params"] = array_slice($this->divideURI(), 1);            
-            // Создание контроллера, передаются параметры
-            $newController = new $controllerExist($paramsExist);
-            // Вызов действия контроллера
-            $newController->$actionExist();
+        if($this->fileExist($_SERVER['DOCUMENT_ROOT'] . '/controllers/' . ucfirst($controller["controller"]) . "Controller.php")) {
+            $controllerPath = $_SERVER['DOCUMENT_ROOT'] . '/controllers/' . ucfirst($controller["controller"]) . "Controller.php";
+            
+            require_once($controllerPath);
+
+            if($this->controllerExist(ucfirst($controller["controller"]) . "Controller")) {
+                $mainController = ucfirst($controller["controller"]) . "Controller";
+
+                if($this->actionExist(ucfirst($controller["controller"]) . "Controller", $controller["action"])) {
+                    $action = $controller["action"];
+                    $params = $controller["params"];
+
+                    $this->callController($mainController, $action, $params, $controllerPath);
+                }
+            }
         } else {
-            $this->callController($this->convertValuesForController($this->divideURI()));
+            $action = $controller["controller"];
+            $mainController = "HomeController";
+            $params = array_merge([$controller["action"]], $controller["params"]);
+            $controllerPath = $_SERVER['DOCUMENT_ROOT'] . '/controllers/HomeController.php';
+
+            
+            if($this->actionHomeControllerExist($action)) {
+                $this->callController($mainController, $action, $params, $controllerPath);
+            }
         }
-
-
     }
-    
 }
